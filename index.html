@@ -522,6 +522,7 @@
                 <option value="aptamil">압타밀(Aptamil)</option>
                 <option value="fortimel">포티멜(Fortimel)</option>
                 <option value="laylayt">레이레이(laylayt)</option>
+                <option value="huawei">하웨이(Huawei)</option>
             </select>
         </div>
 
@@ -610,6 +611,14 @@
                 '반품요청': ['단순 변심', '제품 오염/이염', '제품 파손', '오주문', '사이즈 불일치', '반품 후 환불 지연', '클레임 사은품 지급', '기타'],
                 'AS접수': ['조립 불량', '부품 누락', '프레임 불안정', '매트리스 결함', '재포장 요청', '기타'],
                 '사용문의': ['침대 사용법', '매트리스 관리', '조립 방법', '제품 사양 문의', '기타'],
+                '기타문의': ['사은품 문의', 'CS 친절도', '기타']
+            },
+            huawei: {
+                '배송문의': ['배송 지연', '오배송', '배송지 오기입', '수취인 부재', '송장 미등록', '기타'],
+                '교환요청': ['제품 오염/이염', '제품 파손', '구성품 누락', '색상/옵션 오류', '초기불량', '클레임 사은품 지급', '기타'],
+                '반품요청': ['단순 변심', '제품 오염/이염', '제품 파손', '오주문', '반품 후 환불 지연', '클레임 사은품 지급', '기타'],
+                'AS접수': ['작동 불량', '부품 누락', '재포장 요청', '기타'],
+                '사용문의': ['어플사용/연동', '제품사용', '소모품사용', '기타'],
                 '기타문의': ['사은품 문의', 'CS 친절도', '기타']
             }
         };
@@ -702,7 +711,8 @@
                 '(필로우) 레이레이 메모리폼 필로우',
                 '(침구) 레이레이 매트리스 커버',
                 '(침구) 레이레이 침대 패드'
-            ]
+            ],
+            huawei: []
         };
 
         // 대분류 변경 시
@@ -847,7 +857,8 @@
                     dreame: '드리미(dreame)',
                     aptamil: '압타밀(Aptamil)',
                     fortimel: '포티멜(Fortimel)',
-                    laylayt: '레이레이(laylayt)'
+                    laylayt: '레이레이(laylayt)',
+                    huawei: '하웨이(Huawei)'
                 };
                 const brandName = brandNameMap[brand] || brand;
                 const products = productData[brand];
@@ -903,7 +914,8 @@
                         dreame: '드리미(dreame)',
                         aptamil: '압타밀(Aptamil)',
                         fortimel: '포티멜(Fortimel)',
-                        laylayt: '레이레이(laylayt)'
+                        laylayt: '레이레이(laylayt)',
+                        huawei: '하웨이(Huawei)'
                     };
                     const brandName = brandNameMap[brand] || brand;
                     const products = productData[brand];
