@@ -501,11 +501,17 @@
                 <div class="version-info">본 페이지는 2025-12-30 삭제 될 예정입니다. </div>
             </div>
             <div class="header-actions">
-                <button class="download-btn" onclick="downloadExcel()">
+                <button class="download-btn" onclick="downloadCurrentSelectionExcel()">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    엑셀 다운로드
+                    선택 분류 엑셀 저장
+                </button>
+                <button class="download-btn" onclick="downloadExcel()">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    전체 분류표 엑셀 다운로드
                 </button>
             </div>
         </div>
@@ -523,6 +529,7 @@
                 <option value="fortimel">포티멜(Fortimel)</option>
                 <option value="huawei">하웨이(Huawei)</option>
                 <option value="laylay">레이레이(laylay)</option>
+                <option value="evian">에비앙(evian)</option>
             </select>
         </div>
 
@@ -620,6 +627,14 @@
                 'AS접수': ['조립 불량', '부품 누락', '프레임 불안정', '매트리스 결함', '재포장 요청', '기타'],
                 '사용문의': ['침대 사용법', '매트리스 관리', '조립 방법', '제품 사양 문의', '기타'],
                 '기타문의': ['사은품 문의', 'CS 친절도', '기타']
+            },
+            evian: {
+                '배송문의': ['배송 지연', '오배송', '배송지 오기입', '수취인 부재', '송장 미등록', '기타'],
+                '교환요청': ['제품 파손/누수', '이물질', '수량 오류', '유통기한 문제', '기타'],
+                '반품요청': ['단순 변심', '제품 파손/누수', '유통기한 문제', '부분환불', '기타'],
+                '환불요청': ['반품 후 환불 지연', '기타'],
+                '사용문의': ['보관방법', '섭취 관련', '구매 문의', '기타'],
+                '기타문의': ['이벤트/사은품', '제품 성분/원산지', '기타']
             }
         };
 
@@ -713,6 +728,15 @@
                 'HUAWEI FIT4 퀵링크 나일론 워치밴드 (Purple)',
                 'HUAWEI FIT 4 Pro 퀵링크 나일론 워치밴드 (Green)',
                 'HUAWEI FIT 4 Pro 퀵링크 나일론 워치밴드 (Blue)'
+            ],
+            evian: [
+                '생수 PET 330ml',
+                '생수 PET 500ml',
+                '생수 PET 1L',
+                '생수 Glass 330ml',
+                '생수 Glass 750ml',
+                '스파클링 Glass 330ml',
+                '스파클링 Glass 750ml'
             ],
             laylay: [
                 '(매트리스) 레이레이 LAYZ-1 픽셀 스프링 매트리스',
@@ -875,18 +899,11 @@
             const content = document.getElementById('tableContent');
             let html = '';
 
-            // 각 브랜드별로 테이블 생성
+            // 각 브랜드별로 테이블 생성 (드리미~에비앙)
             Object.keys(categoryData).forEach(brand => {
-                const brandNameMap = {
-                    dreame: '드리미(dreame)',
-                    aptamil: '압타밀(Aptamil)',
-                    fortimel: '포티멜(Fortimel)',
-                    laylay: '레이레이(laylay)',
-                    huawei: '하웨이(Huawei)'
-                };
                 const brandName = brandNameMap[brand] || brand;
                 const products = productData[brand];
-                
+
                 html += `<div class="brand-section">`;
                 html += `<div class="brand-title">${brandName}</div>`;
                 html += `<table class="category-table">`;
@@ -926,24 +943,68 @@
             content.innerHTML = html;
         }
 
-        // 엑셀 다운로드 함수
+        // 브랜드 표시명 맵 (공통)
+        const brandNameMap = {
+            dreame: '드리미(dreame)',
+            aptamil: '압타밀(Aptamil)',
+            fortimel: '포티멜(Fortimel)',
+            huawei: '하웨이(Huawei)',
+            laylay: '레이레이(laylay)',
+            evian: '에비앙(evian)'
+        };
+
+        // 현재 선택한 문의 1건 엑셀 저장
+        function downloadCurrentSelectionExcel() {
+            try {
+                const mainVal = document.getElementById('mainCategory').value;
+                const middleVal = document.getElementById('middleCategory').value;
+                const subVal = document.getElementById('subCategory').value;
+                const productVal = document.getElementById('productName').value;
+                const detailVal = document.getElementById('detailOption').value.trim();
+                const historyVal = document.getElementById('consultationHistory').value.trim();
+
+                if (!mainVal) {
+                    alert('대분류를 선택한 뒤 다운로드해주세요.');
+                    return;
+                }
+
+                const wb = XLSX.utils.book_new();
+                const headers = ['대분류', '중분류', '소분류', '제품명', '상세옵션', '상담이력', '접수일시'];
+                const mainLabel = brandNameMap[mainVal] || mainVal;
+                const now = new Date();
+                const dateTimeStr = now.getFullYear() + '-' +
+                    String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(now.getDate()).padStart(2, '0') + ' ' +
+                    String(now.getHours()).padStart(2, '0') + ':' +
+                    String(now.getMinutes()).padStart(2, '0') + ':' +
+                    String(now.getSeconds()).padStart(2, '0');
+                const row = [mainLabel, middleVal || '', subVal || '', productVal || '', detailVal, historyVal, dateTimeStr];
+                const data = [headers, row];
+                const ws = XLSX.utils.aoa_to_sheet(data);
+                ws['!cols'] = [
+                    { wch: 18 }, { wch: 22 }, { wch: 28 }, { wch: 40 }, { wch: 30 }, { wch: 50 }, { wch: 20 }
+                ];
+                XLSX.utils.book_append_sheet(wb, ws, '문의분류');
+                const dateStr = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+                const fileName = `문의분류_선택_${dateStr}_${String(now.getTime()).slice(-6)}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+            } catch (error) {
+                console.error('선택 분류 엑셀 저장 중 오류:', error);
+                alert('엑셀 저장 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 전체 문의분류 테이블 엑셀 다운로드 (드리미~에비앙)
         function downloadExcel() {
             try {
                 // 워크북 생성
                 const wb = XLSX.utils.book_new();
                 
-                // 각 브랜드별로 시트 생성
+                // 각 브랜드별로 시트 생성 (드리미~에비앙)
                 Object.keys(categoryData).forEach(brand => {
-                    const brandNameMap = {
-                        dreame: '드리미(dreame)',
-                        aptamil: '압타밀(Aptamil)',
-                        fortimel: '포티멜(Fortimel)',
-                        laylay: '레이레이(laylay)',
-                        huawei: '하웨이(Huawei)'
-                    };
                     const brandName = brandNameMap[brand] || brand;
                     const products = productData[brand];
-                    
+
                     // 데이터 배열 생성
                     const data = [];
                     
